@@ -18,6 +18,7 @@ This package is not meant to be installed directly. It ships as a transitive nat
 # Public API
 
 - `JavaScriptRuntime`: entry point for evaluating scripts, scheduling work on the JS thread, and creating values.
+- `JavaScriptRuntime.Scheduler`: schedules work on the JS thread of a runtime from any thread, without keeping the runtime alive. Get it with `runtime.scheduler`.
 - `JavaScriptValue`, `JavaScriptObject`, `JavaScriptArray`, `JavaScriptFunction`, `JavaScriptArrayBuffer`, `JavaScriptTypedArray`, `JavaScriptPromise`, `JavaScriptBigInt`, `JavaScriptSymbol`, `JavaScriptError`, `JavaScriptWeakObject`: non-copyable (`~Copyable`) wrappers around their JSI counterparts.
 - `JavaScriptRef<T>`: turns any of the above into a reference type for use in escaping closures and containers.
 - `JavaScriptCallback`: a JavaScript function that native code can keep and call later from any thread, waiting for the result, awaiting it, or not waiting at all. It keeps the function alive until it's released, and throws once the runtime is gone.

@@ -14,9 +14,12 @@ extension JavaScriptRuntime {
   /// dropped and `execute` throws ``JavaScriptCallback/RuntimeLostError``. `execute` also throws it
   /// when the host drops the task without running it.
   ///
+  /// Keep it instead of the runtime to run work on the JavaScript thread later, from any thread. It
+  /// doesn't keep the runtime alive.
+  ///
   /// Without a host scheduler (``supportsAsyncScheduling`` is `false`), work runs on the calling
   /// thread, so the caller must not race the runtime's `deinit`.
-  internal final class Scheduler: @unchecked Sendable {
+  public final class Scheduler: @unchecked Sendable {
     private let pointee: expo.RuntimeScheduler
     private let handle: JavaScriptRuntimeHandle
 
@@ -39,7 +42,7 @@ extension JavaScriptRuntime {
 
     /// Whether the runtime may still be alive. Safe from any thread: `false` is final, `true` may be stale.
     @inline(__always)
-    internal var mayBeAlive: Bool {
+    public var mayBeAlive: Bool {
       return pointee.isRuntimeAlive()
     }
 
@@ -265,8 +268,10 @@ extension JavaScriptRuntime {
       }
     }
 
+    /// Schedules `body` to run on the JavaScript thread with the runtime. The work is dropped when the
+    /// runtime is gone.
     @inline(__always)
-    internal func schedule(
+    public func schedule(
       priority: JavaScriptRuntime.SchedulerPriority = .normal,
       _ body: @escaping @JavaScriptActor (JavaScriptRuntime) -> Void
     ) {
