@@ -1,5 +1,12 @@
 # Changelog
 
+## 58.0.30
+
+### Patch Changes
+
+- Fix TypeScript rejecting a `PlatformColor` as the text color of the universal `Text`, `TextInput`, and `Collapsible`. The `color` of `UniversalTextStyle` is now a `ColorValue`. ([#53573](https://github.com/expo/expo/pull/53573) by [@miniware9](https://github.com/miniware9))
+- [Web] Fix a universal `TextInput` that did not show a `set()` write to its `value` state when the React Compiler compiled the component that created the state. `useNativeState` on web now returns a new object each time its value changes. ([#53767](https://github.com/expo/expo/pull/53767) by [@expo-bot](https://github.com/expo-bot))
+
 ## 58.0.29
 
 ### Patch Changes
