@@ -5,8 +5,8 @@ import ExpoModulesCore
 
 public class ObserveAppDelegateSubscriber: ExpoAppDelegateSubscriber {
   public func appDelegateWillBeginInitialization() {
-    // Same condition as the app metrics launch cleanup, so no setting outlives the deleted data.
-    if !ObserveConsent.isGranted {
+    // Same condition as the app metrics launch cleanup, so both delete together or not at all.
+    if ObserveConsent.state == .notGranted {
       ObserveUserDefaults.deleteStoredSettings()
     }
   }

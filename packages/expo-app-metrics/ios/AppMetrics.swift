@@ -77,19 +77,26 @@ public struct AppMetrics {
   // Make the initializer private to prevent non-singleton usage.
   private init() {}
 
-  /// Deletes the metrics database, the pending-error files, the legacy JSON file, and the settings.
+  /// Deletes the stored data while consent is not granted. Runs at launch.
   static func deleteStoredData() {
     guard let databaseDirectory = try? MetricsDatabase.defaultDirectoryUrl(),
       let pendingErrorsDirectory = try? PendingErrorStore.directoryUrl()
     else {
       return
     }
-    deleteStoredData(databaseDirectory: databaseDirectory, pendingErrorsDirectory: pendingErrorsDirectory)
-    MetricsDatabase.cleanUpLegacyStorage()
+    deleteStoredData(
+      consent: ObserveConsent.state,
+      databaseDirectory: databaseDirectory,
+      pendingErrorsDirectory: pendingErrorsDirectory
+    )
   }
 
-  /// Deletes from explicit directories. Tests use this overload to point at a temporary directory.
-  static func deleteStoredData(databaseDirectory: URL, pendingErrorsDirectory: URL) {
+  /// Deletes the metrics database, the pending-error files, the legacy JSON file, and the settings,
+  /// only when `consent` is `.notGranted`.
+  static func deleteStoredData(consent: ObserveConsent.State, databaseDirectory: URL, pendingErrorsDirectory: URL) {
+    guard consent == .notGranted else {
+      return
+    }
     let databaseUrl = databaseDirectory.appendingPathComponent("metrics.db")
     do {
       try MetricsDatabase.removeDatabaseFile(at: databaseUrl)
@@ -98,6 +105,7 @@ public struct AppMetrics {
     }
     try? FileManager.default.removeItem(at: pendingErrorsDirectory)
     AppMetricsUserDefaults.deleteStoredSettings()
+    MetricsDatabase.cleanUpLegacyStorage()
   }
 
   // MARK: - Read API for downstream consumers (e.g. expo-observe)
