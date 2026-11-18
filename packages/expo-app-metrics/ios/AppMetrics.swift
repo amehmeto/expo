@@ -77,6 +77,29 @@ public struct AppMetrics {
   // Make the initializer private to prevent non-singleton usage.
   private init() {}
 
+  /// Deletes the metrics database, the pending-error files, the legacy JSON file, and the settings.
+  static func deleteStoredData() {
+    guard let databaseDirectory = try? MetricsDatabase.defaultDirectoryUrl(),
+      let pendingErrorsDirectory = try? PendingErrorStore.directoryUrl()
+    else {
+      return
+    }
+    deleteStoredData(databaseDirectory: databaseDirectory, pendingErrorsDirectory: pendingErrorsDirectory)
+    MetricsDatabase.cleanUpLegacyStorage()
+  }
+
+  /// Deletes from explicit directories. Tests use this overload to point at a temporary directory.
+  static func deleteStoredData(databaseDirectory: URL, pendingErrorsDirectory: URL) {
+    let databaseUrl = databaseDirectory.appendingPathComponent("metrics.db")
+    do {
+      try MetricsDatabase.removeDatabaseFile(at: databaseUrl)
+    } catch {
+      logger.warn("[AppMetrics] Failed to delete the metrics database: \(error.localizedDescription)")
+    }
+    try? FileManager.default.removeItem(at: pendingErrorsDirectory)
+    AppMetricsUserDefaults.deleteStoredSettings()
+  }
+
   // MARK: - Read API for downstream consumers (e.g. expo-observe)
 
   /// Returns metric rows whose `id` is greater than `cursor`, in ascending id order. Consumers persist
